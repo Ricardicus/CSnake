@@ -140,6 +140,7 @@ void init_x() {
     fprintf(stderr, "XAllocNamedColor - failed to allocated 'red' color.\n");
     exit(1);
   	}
+
 }
 
 /* returns system resources to the system */
@@ -366,8 +367,10 @@ int main(void)
 
 /* Initialises the GUI */
 	init_x();
-/* Lets the X window server that multiple threads uses the X window in this program */
-	XInitThreads(); 
+
+/* prepating the X window client for multi-threading */
+  	XInitThreads();
+
 /* Threads declaration */
 	pthread_t event_loop;
 	pthread_t timer;

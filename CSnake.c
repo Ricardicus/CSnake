@@ -243,16 +243,16 @@ void *event_listener()
 			{
 				dir = down;
 			}
-		}
-		if (event.type==ButtonPress) {
-		/* tell where the mouse Button was Pressed */
-			printf("You pressed a button at (%i,%i)\n",
+		}		
+		/* if (event.type==ButtonPress) {
+			printf("Button pressed at (%i,%i)\n",
 				event.xbutton.x,event.xbutton.y);
 			XSetForeground(dis,gc,white.pixel);
 			XFillRectangle(dis, win, gc, 0,0,width,height);
 			XSetForeground(dis,gc,red.pixel);
 			XFillRectangle(dis, win, gc, event.xbutton.x,event.xbutton.y, event.xbutton.x + 10,event.xbutton.y + 10);
 		}
+		*/		
         else if (event.type == ConfigureNotify) {
             XConfigureEvent xce = event.xconfigure;
             /* This event type is generated for a variety of
@@ -325,15 +325,24 @@ void place_food()
 /* function invoked by the timer loop */
 void* timer_event_handle(void * todo)
 {
-	move();
-	draw();
+	static int action = 0;
+	int move_draw_ratio = 4;
+
+	if(action==0)
+	{
+		move();
+		draw();
+	} else {
+		draw();
+	}
+	action=(action+1)%move_draw_ratio;
 	return NULL;
 }
 
 /* the timer loop! Constitutes along with the event listener loop pretty much the heart of the game loop */
 void * timer_loop(void* tf)
 {
-	unsigned long event_trigger = 30000000;
+	unsigned long event_trigger = 10000000;
   	unsigned long event_counter = 0;
 
   	timer_func tf_f = (timer_func) tf;

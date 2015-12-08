@@ -1,3 +1,8 @@
+#if 0
+Snake, an old time classic game. 
+Consult readme if you can't compile this. 
+#endif
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
@@ -16,7 +21,6 @@ void place_food(void);
 void *timer_event_handle(void*);
 void *event_looping(void*);
 void *timer_loop(void*);
-void generic_print_func(void*); /* only used for testing */
 
 /* Type declarations */
 typedef void (*timer_func)(void);
@@ -138,15 +142,15 @@ void init_x() {
   	}
 }
 
+/* returns system resources to the system */
 void close_x() {
-/* it is good programming practice to return system resources to the 
-   system...
-*/
 	XFreeGC(dis, gc);
 	XDestroyWindow(dis,win);
 	XCloseDisplay(dis);	
 	exit(1);				
 }
+
+/* draws the game board on screen */
 
 void draw()
 {
@@ -178,11 +182,9 @@ void draw()
 			}
 		}
 	}
-
-	printf("Was drawn\n");
-
 }
 
+/* used in the algorithm of the snake game to not increase the length of the snake while its moving */
 void remove_tail()
 {
 	for(int x = 0; x<nbr_boxes;x++)
@@ -198,7 +200,8 @@ void remove_tail()
 
 }
 
-void *event_looping()
+/* an event listener function */
+void *event_listener()
 {
 	XEvent event;
 	KeySym key;
@@ -206,22 +209,19 @@ void *event_looping()
 
 	Status rc;
 
-	/* look for events forever... */
+	/* look for events */
 	while(1) {		
-		/* get the next event and stuff it into our event variable.
-		   Note:  only events we set the mask for are detected!
-		*/
+		/* get the next event and stuff it into the event variable. */
 		XNextEvent(dis, &event);
 	
 		if (event.type==Expose && event.xexpose.count==0) {
-		/* the window was exposed redraw it! */
-			//redraw();
-			//XDrawRectangle(dis, win, gc, 0, 0, 200, 200);
+		/* the window was exposed and will be redrawn */
+			draw();
 		}
 		if (event.type==KeyPress&&
 		    XLookupString(&event.xkey,text,255,&key,0)==1) {
-		/* use the XLookupString routine to convert the invent
-		   KeyPress data into regular text.  Weird but necessary...
+		/* the XLookupString routine converts the invent
+		   KeyPress data into regular text.  Weird but necessary.
 		*/
 			if (text[0]=='q') {
 				close_x();
@@ -255,11 +255,9 @@ void *event_looping()
 		}
         else if (event.type == ConfigureNotify) {
             XConfigureEvent xce = event.xconfigure;
-
             /* This event type is generated for a variety of
                happenings, so check whether the window has been
                resized. */
-
             if (xce.width != width ||
                 xce.height != height) {
                 width = xce.width;
@@ -271,6 +269,7 @@ void *event_looping()
 	return NULL;
 }
 
+/* moves the snake and checks for collisions */
 void move()
 {
 	int old_snake_x = snake_x;
@@ -308,6 +307,7 @@ void move()
 	}
 }
 
+/* Placing some on the board */
 void place_food()
 {
 	int food_x = rand()%nbr_boxes;
@@ -322,7 +322,7 @@ void place_food()
 	board[food_x][food_y] = food;
 }
 
-
+/* function invoked by the timer loop */
 void* timer_event_handle(void * todo)
 {
 	move();
@@ -330,11 +330,7 @@ void* timer_event_handle(void * todo)
 	return NULL;
 }
 
-void generic_print_func()
-{
-	printf("Hej!\n");
-}	
-
+/* the timer loop! Constitutes along with the event listener loop pretty much the heart of the game loop */
 void * timer_loop(void* tf)
 {
 	unsigned long event_trigger = 30000000;
@@ -354,19 +350,20 @@ void * timer_loop(void* tf)
   	pthread_exit(NULL);
 }
 
-
+/* main method of the game */
 int main(void)
 {
 	int rc;
 
+/* Initialises the GUI */
 	init_x();
-
+/* Lets the X window server that multiple threads uses the X window in this program */
 	XInitThreads(); 
-	
+/* Threads declaration */
 	pthread_t event_loop;
 	pthread_t timer;
 
-    rc = pthread_create(&event_loop, NULL, event_looping,NULL);
+    rc = pthread_create(&event_loop, NULL, event_listener,NULL);
     if (rc){
         printf("ERROR; return code from pthread_create() is %d\n", rc);
         exit(-1);

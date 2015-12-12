@@ -42,11 +42,13 @@ int right = 4;
 int food = -1;
 int empty = 0;
 int dir;
+int points;
+
+/* the colors black and white */
+	unsigned long black,whiteP;
 
 /* Initialisation of the program */
 void init_x() {
-	/* get the colors black and white (see section for details) */
-	unsigned long black,whiteP;
 
 	/* the nbr of boxes are set */
 	nbr_boxes = 16;
@@ -66,10 +68,11 @@ void init_x() {
 		}
 	}
 
-	/* starting position */
+	/* starting position and points */
 	snake_x=nbr_boxes/2;
 	snake_y=nbr_boxes/2;
 	board[snake_y][snake_x] = 1;
+	points = 0;
 
 	/* staring direction */
 	dir = 2;
@@ -151,8 +154,9 @@ void close_x() {
 	exit(1);				
 }
 
-/* draws the game board on screen */
+char point_text[80];
 
+/* draws the game board on screen */
 void draw()
 {
 	XSetForeground(dis,gc,white.pixel);
@@ -167,22 +171,24 @@ void draw()
 			{
 				XSetForeground(dis,gc,white.pixel);
 				XFillRectangle(dis, win, gc, x*blockwidth,y*blockheight,blockwidth,blockheight);
-				XFlush(dis);
 			}
 			else if(board[x][y] == food)
 			{
 				XSetForeground(dis,gc,green.pixel);
 				XFillRectangle(dis, win, gc, x*blockwidth,y*blockheight,blockwidth,blockheight);
-				XFlush(dis);
 			}
 			else if(board[x][y] > 0)
 			{
 				XSetForeground(dis,gc,red.pixel);
 				XFillRectangle(dis,win,gc,x*blockwidth,y*blockheight,blockwidth,blockheight);
-				XFlush(dis);
 			}
 		}
 	}
+
+	sprintf(point_text,"Points: %d",points);
+	XSetForeground(dis,gc,black);
+	XDrawString(dis, win, gc, width-70, height-20, point_text, strlen(point_text));
+	XFlush(dis);
 }
 
 /* used in the algorithm of the snake game to not increase the length of the snake while its moving */
@@ -294,6 +300,7 @@ void move()
 	if(board[snake_x][snake_y] == food) /* Found food! */
 	{
 		board[snake_x][snake_y] = board[old_snake_x][old_snake_y] + 1;
+		points++;
 		place_food();
 	}
 	else if(board[snake_x][snake_y]>0)

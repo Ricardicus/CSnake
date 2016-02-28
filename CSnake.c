@@ -225,7 +225,7 @@ void *event_listener()
 		/* the window was exposed and will be redrawn */
 			draw();
 		}
-		if (event.type==KeyPress&&
+		else if (event.type==KeyPress&&
 		    XLookupString(&event.xkey,text,255,&key,0)==1) {
 		/* the XLookupString routine converts the invent
 		   KeyPress data into regular text.  Weird but necessary.
@@ -379,8 +379,7 @@ int main(void)
   	XInitThreads();
 
 /* Threads declaration */
-	pthread_t event_loop;
-	pthread_t timer;
+	pthread_t event_loop, timer;
 
     rc = pthread_create(&event_loop, NULL, event_listener,NULL);
     if (rc){
